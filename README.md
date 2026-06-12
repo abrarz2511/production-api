@@ -33,3 +33,7 @@ The graph stores a few fields in state:
 - `model_used`: records whether the primary, fallback, or error handler produced the result
 
 This makes the agent behavior explicit: try the primary model first, degrade to fallback on failure, and return a safe response if both models fail.
+
+
+### Langsmith
+<img width="2145" height="984" alt="image" src="https://github.com/user-attachments/assets/d728d452-ae2c-4571-8e93-17f652eae999" />
