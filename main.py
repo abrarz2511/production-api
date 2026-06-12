@@ -10,16 +10,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.config import get_settings
-from app.models import (
+from config import get_settings
+from models import (
     ChatRequest, ChatResponse,
     HealthResponse, MetricsResponse, ErrorResponse
 ) 
 
-from app.security import SecurityPipeline
-from app.cache import ResponseCache
-from app.monitoring import get_logger, MetricsCollector, RequestTimer
-from app.agent import ProductionAgent
+from security import SecurityPipeline
+from cache import ResponseCache
+from monitoring import get_logger, MetricsCollector, RequestTimer
+from agent import ProductionAgent
 
 logger = get_logger()
 security = None

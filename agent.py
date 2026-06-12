@@ -1,4 +1,6 @@
 
+from typing import Optional
+
 from typing_extensions import TypedDict, Annotated, List
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
@@ -6,12 +8,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from langsmith import traceable
 
-from app.config import get_settings
-from typing import Optional
-
+from config import get_settings
 class AgentState(TypedDict):
     "The AgentState for production agent"
-    messages: Annotated[List[BaseMessage], add_messages]
+    messages: Annotated[List[BaseMessage], add_messages]    #add_messages here is a reducer function, with this langgraph appends messages instead of replacing in the agent state
     error: Optional[str]
     retry_count: int
     model_used: str
@@ -34,7 +34,7 @@ class ProductionAgent:
                 response = self.primary_llm.invoke(state["messages"])
 
                 return {
-                    "messages": state["messages"] + [AIMessage(content=response)],
+                    "messages": [response],
                     "error": None,
                     "model_used": "primary"
                 }
@@ -97,17 +97,16 @@ class ProductionAgent:
 
         return graph.compile()
 
-        @traceable(name = "production_agent_invoke")
-        def invoke(self, message: str) -> dict:
-
-            result = self.graph.invoke({
-                "messages" : [HumanMessages(content=message)],
-                "error": None,
-                "retry_count": 0,
-                "model_used": "",
-            })
+    @traceable(name="production_agent_invoke")
+    def invoke(self, message: str) -> dict:
+        result = self.graph.invoke({
+            "messages": [HumanMessage(content=message)],
+            "error": None,
+            "retry_count": 0,
+            "model_used": "",
+        })
         return {
-            "response" : result["messages"][-1].content,
-            "model_used" : result.get("model_used", "unknown"),
+            "response": result["messages"][-1].content,
+            "model_used": result.get("model_used", "unknown"),
             "error": result.get("error"),
         }

@@ -3,8 +3,8 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     OPENAI_API_KEY: str
-    primary_model: str = "gpt-4-0613"
-    fallback_model: str = "gpt-3.5-turbo-0613"
+    primary_model: str = "gpt-5.4-mini"
+    fallback_model: str = "gpt-5.4-nano"
 
     LANGCHAIN_TRACING_V2: bool = True
     LANGSMITH_API_KEY: str

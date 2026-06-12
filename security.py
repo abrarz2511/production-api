@@ -45,7 +45,7 @@ class PIIDetector:
 
     PII_PATTERNS = {
         "email" : re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
-        "phone" : re.compile(r"\b(?:\+?(\d{1,3}))"),
+        "phone": re.compile(r"(?<!\w)(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}(?!\w)"),
         "ssn" : re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
         "credit_card" : re.compile(r"\b(?:\d[ -]*?){13,16}\b"),
     }
@@ -61,17 +61,17 @@ class PIIDetector:
         """Detect potential PII in the input text."""
         detected = {}
         for pii_type, pattern in self.PII_PATTERNS.items():
-            matches = re.findall(pattern, text)
+            matches = pattern.findall(text)
             if matches:
                 detected[pii_type] = matches
         return detected
 
-        def mask(self, text:str) -> str:
-            """Mask detected PII in the input text."""
-            masked = text
-            for pii_type, pattern in self.PII_PATTERNS.items():
-                masked = re.sub(pattern, self.MASK_MAP[pii_type], masked)
-            return masked
+    def mask(self, text: str) -> str:
+        """Mask detected PII in the input text."""
+        masked = text
+        for pii_type, pattern in self.PII_PATTERNS.items():
+            masked = pattern.sub(self.MASK_MAP[pii_type], masked)
+        return masked
 
 class OutputValidator:
     """Validate LLM outputs before returning to user."""
@@ -116,12 +116,12 @@ class SecurityPipeline:
         self.output_validator = OutputValidator()
 
     @traceable(name="validate_input")
-    def check_input(self, text:str) -> tuple[bool, Optional[str]]:
+    def check_input(self, text: str) -> tuple[bool, str | None, list[str]]:
         """Check and sanitize user input."""
         notes = []
         is_safe, reason = self.sanitizer.check(text)
         if not is_safe:
-            return False, [reason]
+            return False, None, [reason] if reason else []
         
         cleaned = self.sanitizer.clean(text)
 
